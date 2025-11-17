@@ -1,0 +1,21 @@
+quarkus:
+  http:
+    port: 18083
+  oidc:
+    enabled: true
+  datasource:
+    jdbc:
+      url: jdbc:mysql://localhost:13306/zimono_trg_a?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: false
+  log:
+    file:
+      enable: false
+    category:
+      "com.zimono.trg.a":
+        level: DEBUG
+      "io.opentelemetry":
+        level: DEBUG

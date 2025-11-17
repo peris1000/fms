@@ -1,0 +1,200 @@
+quarkus:
+  http:
+    port: 18083
+  application:
+    name: microservice_a
+  # Swagger
+  smallrye-openapi:
+    info-title: Microservice A
+    info-version: 1.0.0
+    info-description: Cars, Drivers and Trips management microservice
+  # Metrics
+  micrometer:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        path: /metrics
+  # Health checks
+  smallrye-health:
+    ui.enable: true
+    liveness-path: /health/live
+    readiness-path: /health/ready
+    service-name: microservice_a
+    sampler-type: const
+    sampler-param: 1
+  # Distributed tracing
+  opentelemetry:
+    enabled: true
+    traces:
+      sampler: always_on   # Sample ALL requests
+    tracer:
+      exporter:
+        otlp:    # Export traces via OTLP
+          enabled: true
+          endpoint: http://localhost:4317
+  log:
+    # Console output
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      level: INFO
+    # File output
+    file:
+      enable: true
+      path: ./log/${quarkus.application.name}/application.log
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      rotation:
+        max-file-size: 10M
+        max-backup-index: 5
+        file-suffix: .yyyy-MM-dd
+    # Category-specific levels
+    category:
+      "io.quarkus":
+        level: INFO
+      "org.hibernate":
+        level: WARN
+      "org.apache.kafka":
+        level: WARN
+    # Structured logging (JSON)
+    json:
+      enable: true
+      pretty-print: false
+      fields:
+        service.name: ${quarkus.application.name}
+        service.version: ${quarkus.application.version}
+  devservices:
+    enabled: true
+  # Keycloak OIDC Authentication
+  oidc:
+    enabled: true
+    auth-server-url: ${KEYCLOAK_URL:http://localhost:18080}/realms/fms
+    client-id: fms-microservice-a
+    credentials:
+      secret: ${KEYCLOAK_CLIENT_SECRET:fms-microservice-a-secret}
+    tls:
+      verification: none  # For development only
+    authentication:
+      redirect-path: /login
+      cookie-path: /
+      cookie-same-site: lax
+    roles:
+      source: accesstoken  # Get roles from access token
+    token:
+      issuer: ${KEYCLOAK_URL:http://localhost:18080}/realms/fms
+      # Audience check removed - Keycloak uses 'azp' instead of 'aud' by default
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: true
+    locations: db/migration
+    clean-disabled: true
+  datasource:
+    db-kind: mysql
+    username: user1
+    password: pass1
+  hibernate-orm:
+    jdbc:
+      timezone: UTC
+    database:
+      generation: validate
+    sql-load-script: no-file
+    log:
+      sql: false
+  cache:
+    caffeine:
+      drivers-cache:
+        maximum-size: 1000
+        expire-after-write: PT10M       # 10 minutes
+        expire-after-access: PT5M       # 5 minutes
+        metrics-enabled: true
+      cars-cache:
+        maximum-size: 500
+        expire-after-write: PT15M       # 15 minutes
+        expire-after-access: PT10M      # 10 minutes
+        metrics-enabled: true
+      trips-cache:
+        maximum-size: 2000
+        expire-after-write: PT5M        # 5 minutes (trips change frequently)
+        expire-after-access: PT3M       # 3 minutes
+        metrics-enabled: true
+  # REST client config for calling microservice_c PenaltyResource
+  rest-client:
+    penalty-api:
+      url: http://localhost:18085
+      scope: jakarta.inject.Singleton
+      # Increase timeouts
+      connect-timeout: 10000        # 10 seconds (in ms)
+      read-timeout: 30000           # 30 seconds (in ms)
+      # Add retry
+      max-retries: 3
+      # Connection pool settings
+      connection-ttl: 60000         # 60 seconds
+      connection-pool-size: 10
+      # Circuit breaker
+      failure-threshold: 5
+      delay: 2000
+      success-threshold: 2
+kafka:
+  bootstrap:
+    servers: localhost:19092
+mp:
+  messaging:
+    connector:
+      smallrye-kafka: # traces through kafka
+        propagate-record-headers: true
+    outgoing:
+      trip-starts:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: trip-starts
+        value.serializer: org.apache.kafka.common.serialization.StringSerializer
+      trip-stops:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: trip-stops
+        value.serializer: org.apache.kafka.common.serialization.StringSerializer
+    incoming:
+      driver-penalties:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: driver-penalties
+        group.id: microservice_a
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+# Production/Dev datasource URL (not used in tests - DevServices provides it)
+"%dev":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_a?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+
+"%prod":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_a?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+# Test profile - uses Dev Services for automatic container management
+"%test":
+  quarkus:
+    oidc:
+      enabled: false  # Disable OIDC entirely in tests, use @TestSecurity instead
+    flyway:
+      migrate-at-start: false
+    datasource:
+      devservices:
+        enabled: true
+    hibernate-orm:
+      database:
+        generation: drop-and-create
+    opentelemetry:
+      enabled: false
+    micrometer:
+      enabled: false
+    rest-client:
+      penalty-api:
+        url: http://localhost:18085  # Mock URL for tests
+        trust-all: true
+        verify-host: false
+    arc:
+      unremovable-types:
+        - com.zimono.trg.a.client.PenaltyClient

@@ -1,0 +1,252 @@
+{
+  "realm": "fms",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "refreshTokenMaxReuse": 0,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "clients": [
+    {
+      "clientId": "fms-microservice-a",
+      "name": "FMS Microservice A",
+      "description": "Fleet Management System",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "fms-microservice-a-secret",
+      "redirectUris": [
+        "http://localhost:28080/*",
+        "http://localhost:18080/*"
+      ],
+      "webOrigins": [
+        "http://localhost:28080",
+        "http://localhost:18080"
+      ],
+      "protocol": "openid-connect",
+      "bearerOnly": false,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "client.secret.creation.time": "1704067200"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "client-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role with full access",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "fms"
+      },
+      {
+        "name": "operator",
+        "description": "Operator role with limited access",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "fms"
+      },
+      {
+        "name": "viewer",
+        "description": "Viewer role with read-only access",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "fms"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@fms.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "operator",
+        "viewer"
+      ],
+      "attributes": {
+        "department": ["IT"],
+        "location": ["HQ"]
+      }
+    },
+    {
+      "username": "operator1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "John",
+      "lastName": "Operator",
+      "email": "operator1@fms.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "operator123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operator",
+        "viewer"
+      ],
+      "attributes": {
+        "department": ["Operations"],
+        "location": ["Regional Office"]
+      }
+    },
+    {
+      "username": "operator2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "operator2@fms.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "operator456",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operator",
+        "viewer"
+      ],
+      "attributes": {
+        "department": ["Operations"],
+        "location": ["Regional Office"]
+      }
+    },
+    {
+      "username": "viewer1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Viewer",
+      "email": "viewer1@fms.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "department": ["Monitoring"],
+        "location": ["Remote"]
+      }
+    },
+    {
+      "username": "testuser",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "testuser@fms.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operator"
+      ],
+      "attributes": {
+        "department": ["QA"],
+        "location": ["Testing"]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Administrators",
+      "path": "/Administrators",
+      "realmRoles": ["admin"]
+    },
+    {
+      "name": "Operations",
+      "path": "/Operations",
+      "realmRoles": ["operator"]
+    },
+    {
+      "name": "Viewers",
+      "path": "/Viewers",
+      "realmRoles": ["viewer"]
+    }
+  ],
+  "defaultRoles": ["viewer"],
+  "requiredCredentials": ["password"],
+  "passwordPolicy": "hashIterations(27500) and length(4) and notUsername",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyInitialCounter": 0,
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+  "browserFlow": "browser",
+  "registrationFlow": "registration",
+  "directGrantFlow": "direct grant",
+  "resetCredentialsFlow": "reset credentials",
+  "clientAuthenticationFlow": "clients",
+  "attributes": {
+    "frontendUrl": "http://localhost:18080"
+  }
+}

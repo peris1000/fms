@@ -1,0 +1,168 @@
+quarkus:
+  http:
+    port: 18085
+  application:
+    name: microservice_c
+  # Metrics
+  micrometer:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        path: /metrics
+  # Health checks
+  smallrye-health:
+    ui.enable: true
+    liveness-path: /health/live
+    readiness-path: /health/ready
+    service-name: microservice_c
+    sampler-type: const
+    sampler-param: 1
+  # Distributed tracing
+  opentelemetry:
+    enabled: true
+    traces:
+      sampler: always_on   # Sample ALL requests
+    tracer:
+      exporter:
+        otlp:    # Export traces via OTLP
+          enabled: true
+          endpoint: http://localhost:4317
+  log:
+    # Console output
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      level: INFO
+    # File output
+    file:
+      enable: true
+      path: ./log/${quarkus.application.name}/application.log
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      rotation:
+        max-file-size: 10M
+        max-backup-index: 5
+        file-suffix: .yyyy-MM-dd
+    # Category-specific levels
+    category:
+      "com.zimono.trg.c":
+        level: DEBUG
+      "io.quarkus":
+        level: INFO
+      "org.hibernate":
+        level: WARN
+      "org.apache.kafka":
+        level: WARN
+      "io.quarkus.flyway":
+        level: DEBUG
+      "org.flywaydb":
+        level: DEBUG
+    # Structured logging (JSON)
+    json:
+      enable: true
+      pretty-print: false
+      fields:
+        service.name: ${quarkus.application.name}
+        service.version: ${quarkus.application.version}
+  devservices:
+    enabled: true
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    clean-disabled: true
+  datasource:
+    db-kind: mysql
+    username: user1
+    password: pass1
+
+# Production/Dev datasource URL (not used in tests - DevServices provides it)
+"%dev":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+
+"%prod":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+#  datasource:
+#    db-kind: postgresql
+#    username: ${DB_USERNAME:user1}
+#    password: ${DB_PASSWORD:pass1}
+#    jdbc:
+#      url: ${DB_URL:jdbc:postgresql://localhost:15432/zimono_trg_c}
+#      # Connection pool configuration
+#      initial-size: 5
+#      min-size: 5
+#      max-size: 20
+#      # Connection health check
+#      validation-query-sql: SELECT 1
+#      background-validation-interval: PT2M
+#      # Idle timeout
+#      idle-removal-interval: PT5M
+#      max-lifetime: PT30M
+#      # Leak detection
+#      leak-detection-interval: PT10M
+  hibernate-orm:
+    database:
+      #generation: drop-and-create
+      generation: update
+    log:
+      sql: false
+kafka:
+  bootstrap:
+    servers: localhost:19092
+mp:
+  messaging:
+    connector:
+      smallrye-kafka: # traces through kafka
+        propagate-record-headers: true
+    outgoing:
+      driver-penalties:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: driver-penalties
+        value.serializer: org.apache.kafka.common.serialization.StringSerializer
+        # Performance
+        acks: 1                   # Wait for leader ack
+        compression.type: snappy  # Compress messages
+        batch.size: 16384         # Batch size in bytes
+        linger.ms: 10             # Wait up to 10ms to batch messages
+        # Reliability
+        max.in.flight.requests.per.connection: 5
+        retries: 3
+        retry.backoff.ms: 100
+    incoming:
+      car-heartbeats:
+        connector: smallrye-kafka
+        topic: car-heartbeats
+        group.id: microservice_c
+        health-enabled: true
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        auto.offset.reset: earliest
+        # Performance
+        fetch.min.bytes: 1024   # Fetch at least 1KB
+        fetch.max.wait.ms: 500  # Wait max 500ms for fetch
+        max.poll.records: 100   # Process up to 100 records per poll
+        # Reliability
+        enable.auto.commit: false    # Manual commit for better control
+        session.timeout.ms: 30000    # 30 seconds
+        heartbeat.interval.ms: 3000  # 3 seconds
+# Test profile - uses Dev Services for automatic container management
+"%test":
+  quarkus:
+    flyway:
+      migrate-at-start: false
+    datasource:
+      devservices:
+        enabled: true
+    hibernate-orm:
+      database:
+        generation: drop-and-create
+    opentelemetry:
+      enabled: false
+    micrometer:
+      enabled: false

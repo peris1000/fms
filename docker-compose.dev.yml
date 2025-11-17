@@ -1,0 +1,53 @@
+services:
+  microservice_a:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: fms-microservice-a-dev
+    working_dir: /workspace/microservice_a
+    command: mvn -q -DskipTests quarkus:dev -Dquarkus.profile=dev
+    volumes:
+      - ./:/workspace
+      - ~/.m2:/root/.m2
+    network_mode: host
+    environment:
+      - MAVEN_OPTS=-Xmx512m
+    depends_on:
+      - redpanda
+      - mysql
+      - keycloak
+  microservice_b:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: fms-microservice-b-dev
+    working_dir: /workspace/microservice_b
+    command: mvn -q -DskipTests quarkus:dev -Dquarkus.profile=dev
+    volumes:
+      - ./:/workspace
+      - ~/.m2:/root/.m2
+    network_mode: host
+    environment:
+      - MAVEN_OPTS=-Xmx512m
+    depends_on:
+      - redpanda
+      - mysql
+      - keycloak
+  microservice_c:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: fms-microservice-c-dev
+    working_dir: /workspace/microservice_c
+    command: mvn -q -DskipTests quarkus:dev -Dquarkus.profile=dev
+    volumes:
+      - ./:/workspace
+      - ~/.m2:/root/.m2
+    network_mode: host
+    environment:
+      - MAVEN_OPTS=-Xmx512m
+    depends_on:
+      - redpanda
+      - mysql
+      - keycloak
+
+# NOTE:
+# - We use network_mode: host so the services can keep using their existing dev profile
+#   pointing to localhost (e.g. localhost:19092 for Redpanda, 13306 for MySQL, 18080 for Keycloak)
+#   as described in README. This avoids changing application configs.
+# - Infra (redpanda, mysql, keycloak, jaeger) is defined in docker-compose.yml and will
+#   be started separately, exposing their ports on the host.

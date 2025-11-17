@@ -1,0 +1,956 @@
+{
+	"info": {
+		"_postman_id": "07ad52f7-5b51-45ee-b744-d5da79b79b2f",
+		"name": "TRG fms zimono",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "554780"
+	},
+	"item": [
+		{
+			"name": "check",
+			"item": [
+				{
+					"name": "/metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_A_URL}}/metrics",
+							"host": [
+								"{{MICRO_A_URL}}"
+							],
+							"path": [
+								"metrics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/health/ready",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_A_URL}}/health/ready",
+							"host": [
+								"{{MICRO_A_URL}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/health/live",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_A_URL}}/health/live",
+							"host": [
+								"{{MICRO_A_URL}}"
+							],
+							"path": [
+								"health",
+								"live"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "microservice_a",
+			"item": [
+				{
+					"name": "drivers (token)",
+					"item": [
+						{
+							"name": "/api/drivers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/drivers",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"drivers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/drivers/:id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/drivers/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"drivers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/drivers",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Bob\",\n    \"last_name\": \"Doe\",\n    \"email\": \"bob@example.com\",\n    \"driving_license\": \"1900-0123-01235\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/drivers",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"drivers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/drivers/:id",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john@example.com\",\n    \"driving_license\": \"1900-0123-0123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/drivers/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"drivers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/drivers/:id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/drivers/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"drivers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "cars",
+					"item": [
+						{
+							"name": "/api/cars",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/search",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"brand\": \"FORD\"\n}"
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/search?page=0&size=5&sort=brand&order=desc",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"search"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0"
+										},
+										{
+											"key": "size",
+											"value": "5"
+										},
+										{
+											"key": "sort",
+											"value": "brand"
+										},
+										{
+											"key": "order",
+											"value": "desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/:id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"brand\": \"FORD\",\n    \"model\": \"FIESTA\",\n    \"serial_number\": \"2024/012345\",\n    \"license_plate\": \"ADS-1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/:id",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"brand\": \"FORD\",\n    \"model\": \"ESCORT\",\n    \"serial_number\": \"2024/012345\",\n    \"license_plate\": \"ADS-1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/:id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/assign-driver",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"car_id\": 1,\n    \"driver_id\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/assign-driver",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"assign-driver"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/cars/:id/unassign-driver",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/cars/1/unassign-driver",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"cars",
+										"1",
+										"unassign-driver"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "penalties (token)",
+					"item": [
+						{
+							"name": "tokens",
+							"item": [
+								{
+									"name": "login admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Retrieve token ID\", function() {",
+													"   var jsonData = pm.response.json(); ",
+													"   pm.collectionVariables.set(\"TOKEN\", jsonData.access_token);",
+													"   //pm.globals.set(\"TOKEN\", jsonData.access_token);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/x-www-form-urlencoded",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "client_id",
+													"value": "fms-microservice-a",
+													"type": "text"
+												},
+												{
+													"key": "client_secret",
+													"value": "fms-microservice-a-secret",
+													"type": "text"
+												},
+												{
+													"key": "username",
+													"value": "admin",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "admin123",
+													"type": "text"
+												},
+												{
+													"key": "grant_type",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{KEYCLOAK_URL}}/realms/fms/protocol/openid-connect/token",
+											"host": [
+												"{{KEYCLOAK_URL}}"
+											],
+											"path": [
+												"realms",
+												"fms",
+												"protocol",
+												"openid-connect",
+												"token"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "login viewer1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Retrieve token ID\", function() {",
+													"   var jsonData = pm.response.json(); ",
+													"   pm.collectionVariables.set(\"TOKEN\", jsonData.access_token);",
+													"   //pm.globals.set(\"TOKEN\", jsonData.access_token);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/x-www-form-urlencoded",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "client_id",
+													"value": "fms-microservice-a",
+													"type": "text"
+												},
+												{
+													"key": "client_secret",
+													"value": "fms-microservice-a-secret",
+													"type": "text"
+												},
+												{
+													"key": "username",
+													"value": "viewer1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "viewer123",
+													"type": "text"
+												},
+												{
+													"key": "grant_type",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{KEYCLOAK_URL}}/realms/fms/protocol/openid-connect/token",
+											"host": [
+												"{{KEYCLOAK_URL}}"
+											],
+											"path": [
+												"realms",
+												"fms",
+												"protocol",
+												"openid-connect",
+												"token"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "login operator1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Retrieve token ID\", function() {",
+													"   var jsonData = pm.response.json(); ",
+													"   pm.collectionVariables.set(\"TOKEN\", jsonData.access_token);",
+													"   //pm.globals.set(\"TOKEN\", jsonData.access_token);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/x-www-form-urlencoded",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "client_id",
+													"value": "fms-microservice-a",
+													"type": "text"
+												},
+												{
+													"key": "client_secret",
+													"value": "fms-microservice-a-secret",
+													"type": "text"
+												},
+												{
+													"key": "username",
+													"value": "operator1",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "operator123",
+													"type": "text"
+												},
+												{
+													"key": "grant_type",
+													"value": "password",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{KEYCLOAK_URL}}/realms/fms/protocol/openid-connect/token",
+											"host": [
+												"{{KEYCLOAK_URL}}"
+											],
+											"path": [
+												"realms",
+												"fms",
+												"protocol",
+												"openid-connect",
+												"token"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "/api/penalties (a)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/penalties",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"penalties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/penalties/drivers/:id (a/o)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/penalties/drivers/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"penalties",
+										"drivers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/penalties/trips/:id (a/o)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/penalties/trips/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"penalties",
+										"trips",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "trips",
+					"item": [
+						{
+							"name": "/api/trips",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/trips",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"car_id\": 1,\n    \"driver_id\": 1,\n    \"planned_start_time\": \"2024-11-01T12:00:00\",\n    \"planned_end_time\": \"2024-11-01T13:00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/trips/:id",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": 1,\n    \"car_id\": 1,\n    \"planned_start_time\": \"2024-11-01T12:00:00\",\n    \"planned_end_time\": \"2024-11-01T12:00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/trips/:id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips/1",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/trips/:id/start",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips/1/start",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips",
+										"1",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/api/trips/:id/stop",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{MICRO_A_URL}}/api/trips/1/stop",
+									"host": [
+										"{{MICRO_A_URL}}"
+									],
+									"path": [
+										"api",
+										"trips",
+										"1",
+										"stop"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "microservice_c",
+			"item": [
+				{
+					"name": "/api/penalties",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_C_URL}}/api/penalties",
+							"host": [
+								"{{MICRO_C_URL}}"
+							],
+							"path": [
+								"api",
+								"penalties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/penalties/drivers/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_C_URL}}/api/penalties/drivers/1",
+							"host": [
+								"{{MICRO_C_URL}}"
+							],
+							"path": [
+								"api",
+								"penalties",
+								"drivers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/penalties/trips/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{MICRO_C_URL}}/api/penalties/trips/1",
+							"host": [
+								"{{MICRO_C_URL}}"
+							],
+							"path": [
+								"api",
+								"penalties",
+								"trips",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "MICRO_A_URL",
+			"value": "http://localhost:18083",
+			"type": "string"
+		},
+		{
+			"key": "MICRO_C_URL",
+			"value": "http://localhost:18085",
+			"type": "string"
+		},
+		{
+			"key": "KEYCLOAK_URL",
+			"value": "http://localhost:18080",
+			"type": "string"
+		},
+		{
+			"key": "TOKEN",
+			"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIwZzJVc0pkQWRycEFxTWtScGpwN3hKdkhXNlpybzRoYkJXdzZMOENEZ1c0In0.eyJleHAiOjE3NjMyNTUzOTQsImlhdCI6MTc2MzI1NTA5NCwianRpIjoiNGM1Y2E3NjktYjQ1NS00NjBjLWJjMjQtYTBiOWU0ODI0ODBmIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxODA4MC9yZWFsbXMvZm1zIiwic3ViIjoiNmNiNzMwYTYtNWE5MC00NTIxLWEyNmItMTMzZGQ5NDgyYzFkIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZm1zLW1pY3Jvc2VydmljZS1hIiwic2lkIjoiNGRhZmQ4MjMtNDYxMS00ZDFlLTlmY2ItYzQzOGNlMzNjZGMwIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjI4MDgwIiwiaHR0cDovL2xvY2FsaG9zdDoxODA4MCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsidmlld2VyIiwiYWRtaW4iLCJvcGVyYXRvciJdfSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJBZG1pbiBVc2VyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4iLCJnaXZlbl9uYW1lIjoiQWRtaW4iLCJmYW1pbHlfbmFtZSI6IlVzZXIiLCJlbWFpbCI6ImFkbWluQGZtcy5jb20ifQ.CVU2Op5vlGblkbVbUAyy4QbTnV3mBnnIMssbK3IEhUa6RnHWE_nUmWk7YZwNoxzGnTzKjfEr7QHu9GRNuK2zR6yiXx4_XpwiN7tjBWKcgYUxfngcBOqCJuntlOJcHVLLMJkgSP1RZEuNfnEDwTc-6T02VHkoV5DYURG8HVoibraPRydTBfhdgOKBL5ePYsQDJOuPlwk4XofgVR_WV8--OuMSMuf8Hr9J0riexNkeg7fv8_Ak4KD2NJHaEG641vcfb9mIdcUOnOrHDNzVo36u_c6eOQajdrnoBHwLW_Hl3HarqqlqoRPPsv0in_CKd8nWQAUT6Sp1KlxBIFRKmE86fw\",\"expires_in\":300,\"refresh_expires_in\":1800,\"refresh_token\":\"eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI2OGQ5YTEyMS05NWQ4LTQxNzktOWVkMi1jMjc1MTU4NGYyYWQifQ.eyJleHAiOjE3NjMyNTY4OTQsImlhdCI6MTc2MzI1NTA5NCwianRpIjoiM2FiYWVmZjQtMWViZi00YTBiLWE4MjEtN2E2YTBhMzI3M2U3IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxODA4MC9yZWFsbXMvZm1zIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDoxODA4MC9yZWFsbXMvZm1zIiwic3ViIjoiNmNiNzMwYTYtNWE5MC00NTIxLWEyNmItMTMzZGQ5NDgyYzFkIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImZtcy1taWNyb3NlcnZpY2UtYSIsInNpZCI6IjRkYWZkODIzLTQ2MTEtNGQxZS05ZmNiLWM0MzhjZTMzY2RjMCIsInNjb3BlIjoiYmFzaWMgZW1haWwgcHJvZmlsZSB3ZWItb3JpZ2lucyBhY3Igcm9sZXMifQ.MxFvfU5nJGwpAI2pe4rjyQb3fHi8vYRsUDogO2Oq4v88Wc1-nSsc-kTObCNXTNwGDrajikR2CTj5iOWhwDKC5g",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,120 @@
+services:
+  redpanda:
+    image: redpandadata/redpanda:v25.2.10
+    container_name: fms-redpanda-dev
+    command:
+      - redpanda
+      - start
+      - --smp 1
+      - --overprovisioned
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:19092
+      - --pandaproxy-addr PLAINTEXT://0.0.0.0:28082,OUTSIDE://0.0.0.0:18082
+      - --advertise-pandaproxy-addr PLAINTEXT://redpanda:28082,OUTSIDE://localhost:18082
+      - --schema-registry-addr PLAINTEXT://0.0.0.0:28081,OUTSIDE://0.0.0.0:18081
+    ports:
+      - "19092:19092"
+      - "18081:18081"
+      - "18082:18082"
+    environment:
+      - REDPANDA_ENABLE_USAGE_STATS=false
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    networks:
+      - fms-network
+
+  kafkaui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: fms-kafkaui-dev
+    ports:
+      - "19002:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: Local Kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: redpanda:29092
+    networks:
+      - fms-network
+    depends_on:
+      - redpanda
+
+  mysql:
+    image: mysql:8.4
+    container_name: fms-mysql-dev
+    environment:
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: pass1
+      MYSQL_ROOT_PASSWORD: pass1
+      MYSQL_SSL_MODE: "DISABLED"
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./config/mysql/:/docker-entrypoint-initdb.d
+    command:
+      - --mysqlx=0
+      - --mysqlx-socket=null
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb_buffer_pool_size=256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppass1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - fms-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    container_name: fms-keycloak-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://mysql:3306/zimono_trg_keycloak?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+      KC_DB_USERNAME: user1
+      KC_DB_PASSWORD: pass1
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    command:
+      - start-dev
+      - --import-realm
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./config/keycloak/realms:/opt/keycloak/data/import
+      - keycloak_data:/opt/keycloak/data
+    networks:
+      - fms-network
+    depends_on:
+      - mysql
+#    healthcheck:
+#      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
+#      start_period: 60s
+
+  # Jaeger UI for visualizing traces (optional)
+  jaeger:
+    image: jaegertracing/all-in-one:1.74.0
+    container_name: fms-jaeger-dev
+    ports:
+      - "16686:16686" # Jaeger UI
+      -  "4317:4317"  # OTLP gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - fms-network
+
+networks:
+  fms-network:
+    driver: bridge
+
+volumes:
+  redpanda-data:
+  keycloak_data:
+  vault_data:
+  mysql_data:

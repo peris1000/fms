@@ -1,0 +1,121 @@
+quarkus:
+  http:
+    port: 18084
+  application:
+    name: microservice_b
+  # Metrics
+  micrometer:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        path: /metrics
+  # Health checks
+  smallrye-health:
+    ui.enable: true
+    liveness-path: /health/live
+    readiness-path: /health/ready
+    service-name: microservice_b
+    sampler-type: const
+    sampler-param: 1
+  # Distributed tracing
+  opentelemetry:
+    enabled: true
+    traces:
+      sampler: always_on   # Sample ALL requests
+    tracer:
+      exporter:
+        otlp:    # Export traces via OTLP
+          enabled: true
+          endpoint: http://localhost:4317
+  log:
+    # Console output
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      level: INFO
+    # File output
+    file:
+      enable: true
+      path: ./log/${quarkus.application.name}/application.log
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+      rotation:
+        max-file-size: 10M
+        max-backup-index: 5
+        file-suffix: .yyyy-MM-dd
+    # Category-specific levels
+    category:
+      "com.zimono.trg.b":
+        level: DEBUG
+      "io.quarkus":
+        level: INFO
+      "org.hibernate":
+        level: WARN
+      "org.apache.kafka":
+        level: WARN
+    # Structured logging (JSON)
+    json:
+      enable: true
+      pretty-print: false
+      fields:
+        service.name: ${quarkus.application.name}
+        service.version: ${quarkus.application.version}
+  scheduler:
+    enabled: true
+    metrics:
+      enabled: true
+kafka:
+  bootstrap:
+    servers: localhost:19092
+mp:
+  messaging:
+    connector:
+      smallrye-kafka: # traces through kafka
+        propagate-record-headers: true
+    outgoing:
+      car-heartbeats:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: car-heartbeats
+        value.serializer: org.apache.kafka.common.serialization.StringSerializer
+    incoming:
+      trip-starts:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: trip-starts
+        group.id: microservice_b
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      trip-stops:
+        connector: smallrye-kafka
+        bootstrap.servers: localhost:19092
+        topic: trip-stops
+        group.id: microservice_b
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+simulation:
+  interval: 5s
+  speed:
+    min: 30.0    # Minimum speed in Km/h
+    max: 100.0   # Maximum speed in Km/h
+  location:
+    base-latitude: 40.7128    # NYC
+    base-longitude: -74.0060  # NYC
+    deviation: 0.1  # deviation
+"%test":
+  simulation:
+    interval: 5s
+    speed:
+      min: 30.0
+      max: 100.0
+    location:
+      base-latitude: 40.7128
+      base-longitude: -74.0060
+      deviation: 0.1  # deviation
+# Test profile - uses Dev Services for automatic Kafka container
+"%test":
+  quarkus:
+    opentelemetry:
+      enabled: false
+    micrometer:
+      enabled: false
+    scheduler:
+      enabled: false
