@@ -139,9 +139,8 @@ public class PenaltyResourceTest {
                 .get("/api/penalties/trips/" + tripId)
                 .then()
                 .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].trip_id", equalTo((int) tripId))
-                .body("[0].total_penalty_points", equalTo(7));
+                .body("trip_id", equalTo((int) tripId))
+                .body("total_penalty_points", equalTo(7));
     }
 
     @Test
