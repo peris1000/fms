@@ -67,8 +67,15 @@ to calculate penalties and, if there are any, to store them in the database and 
 Finally, when `Microservice_A` get each driver penalty, it updates the driver's new total of 
 penalties to the database.
 
+### shared-dtos
+Stands for common resources shared between microservices.
 
-### Microservice A (http://localhost:18080)
+Add the common lib to the maven cache:
+```aiignore
+mvn -f ./shared-dtos/pom.xml clean install
+```
+
+### Microservice A (http://localhost:18083)
 
 
 #### Available Endpoints

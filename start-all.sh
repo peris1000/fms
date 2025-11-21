@@ -35,9 +35,9 @@ docker compose -f docker-compose.dev.yml up --remove-orphans
 
 bold "[5/5] All services launched"
 echo "Health endpoints:"
-echo "- A: http://localhost:8080/q/health"
-echo "- B: http://localhost:8081/q/health"
-echo "- C: http://localhost:8082/q/health"
+echo "- A: http://localhost:8083/q/health"
+echo "- B: http://localhost:8084/q/health"
+echo "- C: http://localhost:8085/q/health"
 
 echo
 bold "To stop everything:" 
