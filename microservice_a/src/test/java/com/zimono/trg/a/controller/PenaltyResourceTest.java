@@ -8,12 +8,13 @@ import com.zimono.trg.a.service.TripService;
 import com.zimono.trg.shared.net.DriverPenaltyDto;
 import com.zimono.trg.shared.net.TripPenaltiesDto;
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusMock;
+import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.quarkus.test.security.oidc.Claim;
 import io.quarkus.test.security.oidc.OidcSecurity;
 import io.restassured.http.ContentType;
+import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.ws.rs.NotFoundException;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mockito;
 
-import java.lang.annotation.Annotation;
-import jakarta.enterprise.util.AnnotationLiteral;
 import java.time.Instant;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest

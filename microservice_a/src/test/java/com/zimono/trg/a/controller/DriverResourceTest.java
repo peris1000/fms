@@ -2,9 +2,6 @@ package com.zimono.trg.a.controller;
 
 import com.zimono.trg.a.dto.DriverDto;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-import io.quarkus.test.security.oidc.Claim;
-import io.quarkus.test.security.oidc.OidcSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -114,7 +111,7 @@ public class DriverResourceTest {
 
     @Test
     @Order(6)
-    public void test_get_driver_by_id__not_found() {
+    public void test_get_driver_by_id_not_found() {
         given()
                 
                 .when()

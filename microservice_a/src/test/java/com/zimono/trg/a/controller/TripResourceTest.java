@@ -4,26 +4,43 @@ import com.zimono.trg.a.dto.CarAssignmentRequest;
 import com.zimono.trg.a.dto.CarDto;
 import com.zimono.trg.a.dto.DriverDto;
 import com.zimono.trg.a.dto.TripDto;
+import com.zimono.trg.a.producer.TripProducer;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 
 @QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TripResourceTest {
+
+    @TestHTTPResource
+    URI baseUri;
 
     private static Long tripId;
     private static Long carId;
     private static Long driverId;
 
+    @InjectMock
+    TripProducer tripProducer;
+
     @BeforeAll
-    public static void setupTestData() {
+    public void setupTestData() {
+        // while we are in @BeforeAll make sure restAssured is configured to use our baseUri
+        RestAssured.baseURI = baseUri.toString();
+
         // Create driver
         DriverDto driverDto = new DriverDto();
         driverDto.setFirstName("Trip");
@@ -123,6 +140,8 @@ public class TripResourceTest {
     @Test
     @Order(4)
     public void test_start_trip() {
+        doNothing().when(tripProducer).startTrip(any());
+
         given()
                 .contentType(ContentType.JSON)
                 .when()
@@ -135,6 +154,8 @@ public class TripResourceTest {
     @Test
     @Order(5)
     public void test_stop_trip() {
+        doNothing().when(tripProducer).stopTrip(any());
+
         // Ensure the trip is started (idempotent: 200 if started now, or 409 if already started)
         given()
                 .contentType(ContentType.JSON)

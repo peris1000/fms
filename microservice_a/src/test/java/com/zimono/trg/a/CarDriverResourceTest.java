@@ -4,20 +4,12 @@ import com.zimono.trg.a.dto.CarAssignmentRequest;
 import com.zimono.trg.a.dto.CarDto;
 import com.zimono.trg.a.dto.DriverDto;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-import io.quarkus.test.security.oidc.Claim;
-import io.quarkus.test.security.oidc.OidcSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@TestSecurity(user = "admin", roles = {"admin", "operator", "viewer"})
-@OidcSecurity(claims = {
-    @Claim(key = "email", value = "admin@fms.com"),
-    @Claim(key = "preferred_username", value = "admin")
-})
 class CarDriverResourceTest {
 
 

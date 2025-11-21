@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Objects;
 
 @ApplicationScoped
 public class CarService {
+    private static final Logger LOG = LoggerFactory.getLogger(CarService.class.getName());
 
     @Inject
     CarRepository carRepo;
@@ -81,38 +84,39 @@ public class CarService {
             }
         });
 
-        Car existing = getCarById(carId);
-        if (existing != null) {
-            cacheInvalidationService.invalidateCarCache(existing.getId());
-
-            existing.setBrand(carDto.getBrand());
-            existing.setModel(carDto.getModel());
-            existing.setSerialNumber(carDto.getSerialNumber());
-            existing.setLicensePlate(carDto.getLicensePlate());
-            existing.setUpdatedAt(Instant.now());
-            carRepo.persist(existing);
-
-            return existing;
-        } else {
-            throw new NotFoundException("Car not found");
+        Car existing = carRepo.findById(carId);
+        if (existing == null) {
+            throw new NotFoundException("Car not found with id: " + carId);
         }
+
+        cacheInvalidationService.invalidateCarCache(existing.getId());
+
+        existing.setBrand(carDto.getBrand());
+        existing.setModel(carDto.getModel());
+        existing.setSerialNumber(carDto.getSerialNumber());
+        existing.setLicensePlate(carDto.getLicensePlate());
+        existing.setUpdatedAt(Instant.now());
+
+        LOG.info("Updated car with ID: {}", carId);
+        return existing;
     }
 
     @Transactional
     public void delete(Long id) {
-        Car existing = getCarById(id);
-        if (existing != null) {
-
-            long tripCount = tripRepo.countByCar(id);
-            if (tripCount > 0) {
-                throw new IllegalArgumentException("Car has trips assigned. Cannot delete.");
-            }
-
-            carRepo.deleteById(id);
-            cacheInvalidationService.invalidateCarCache(existing.getId());
-        } else {
-            throw new NotFoundException("Car not found");
+        Car existing = carRepo.findById(id);
+        if (existing == null) {
+            throw new NotFoundException("Car not found with id: " + id);
         }
+        long tripCount = tripRepo.countByCar(id);
+        if (tripCount > 0) {
+            throw new IllegalArgumentException("Car has trips assigned. Cannot delete.");
+        }
+
+        carRepo.deleteById(id);
+
+        // invalidate cache
+        cacheInvalidationService.invalidateCarCache(existing.getId());
+        LOG.info("Deleted car with ID: {}", id);
     }
 
     @Transactional

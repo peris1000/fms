@@ -8,7 +8,6 @@ import com.zimono.trg.a.service.TripService;
 import com.zimono.trg.shared.net.DriverPenaltyDto;
 import com.zimono.trg.shared.net.TripPenaltiesDto;
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Uni;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;

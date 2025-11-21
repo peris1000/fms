@@ -3,28 +3,24 @@ DROP table if exists `car`;
 DROP table if exists `driver`;
 
 CREATE TABLE `driver` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
     `first_name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `last_name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `driving_license` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `penalty_points` int(6) unsigned DEFAULT '0',
+    `penalty_points` int unsigned DEFAULT '0',
     `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- create table driver_SEQ (
---     next_val bigint
--- ) engine=InnoDB;
-
 CREATE TABLE `car` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
     `brand` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `model` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `serial_number` varchar(128) COLLATE utf8mb4_unicode_ci NULL,
     `license_plate` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `assignedDriver_id` bigint(20) unsigned NULL,
+    `assignedDriver_id` bigint unsigned NULL,
     `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`),
@@ -33,14 +29,10 @@ CREATE TABLE `car` (
     CONSTRAINT `fk_car_driver` FOREIGN KEY (`assignedDriver_id`) REFERENCES `driver` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- create table car_SEQ (
---     next_val bigint
--- ) engine=InnoDB;
-
 CREATE TABLE `trip` (
-    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `car_id` bigint(20) unsigned NOT NULL,
-    `driver_id` bigint(20) unsigned NOT NULL,
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+    `car_id` bigint unsigned NOT NULL,
+    `driver_id` bigint unsigned NOT NULL,
     `planned_start_time` datetime(3) NULL,
     `planned_end_time` datetime(3) NULL,
     `start_time` datetime(3) NULL,
@@ -54,7 +46,4 @@ CREATE TABLE `trip` (
     CONSTRAINT `fk_trip_driver` FOREIGN KEY (`driver_id`) REFERENCES `driver` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- create table trip_SEQ (
---     next_val bigint
--- ) engine=InnoDB;
 

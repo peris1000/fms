@@ -97,7 +97,7 @@ public class DriverService {
         if (carCount > 0) {
             throw new IllegalArgumentException("Driver has cars assigned. Cannot delete.");
         }
-        repo.delete(driver);
+        repo.deleteById(id);
 
         // invalidate cache
         cacheInvalidationService.invalidateDriverCache(id);

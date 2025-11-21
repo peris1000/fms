@@ -12,7 +12,7 @@ quarkus:
         path: /metrics
   # Health checks
   smallrye-health:
-    ui.enable: true
+    ui.enabled: true
     liveness-path: /health/live
     readiness-path: /health/ready
     service-name: microservice_c
@@ -31,12 +31,12 @@ quarkus:
   log:
     # Console output
     console:
-      enable: true
+      enabled: true
       format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
       level: INFO
     # File output
     file:
-      enable: true
+      enabled: true
       path: ./log/${quarkus.application.name}/application.log
       format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
       rotation:

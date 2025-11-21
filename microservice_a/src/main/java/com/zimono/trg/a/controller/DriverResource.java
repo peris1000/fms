@@ -1,16 +1,12 @@
 package com.zimono.trg.a.controller;
 
-import com.zimono.trg.a.client.PenaltyClient;
 import com.zimono.trg.a.dto.DriverDto;
 import com.zimono.trg.a.service.DriverService;
-import io.quarkus.security.Authenticated;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
