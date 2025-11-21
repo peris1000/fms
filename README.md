@@ -2,20 +2,24 @@
 
 **Time: 3 days**
 
-## Scenarion
+## Scenario
 
 You are required to develop 3 microservices (using Quarkus or any other framework you
 prefer) for a fictitious Fleet Management System (FMS) as follows:
+
 ● Microservice_A: exposes an HTTP Restful API, that allows performing CRUD operations
 for the management of Fleet entities (i.e: Driver, Car, Trip, etc). Also provides endpoints
 for assigning a Driver to a Car.
+
 ● Microservice_B: simulates a Car that is driven around a city. This microservice generates
 heartbeats on frequent time intervals that encapsulate the state of the car (car_id,
 geo-coordinates, speed, etc) and driver identity.
+
 ● Microservice_C: consumes heartbeats to apply penalty points to drivers that are not
 driving in a behaved manner. Two (2) Penalty points are added for every Km over
 60Km/h, five (5) points for over 80Km/h. Driver/Penalty point map is stored in a data store
 (your choice)
+
 Microservices should communicate amongst themselves using a Kafka-based message bus.
 
 
@@ -471,10 +475,5 @@ Check what kafka knows about each project (group)
 ```
 docker exec -it fms-redpanda-dev rpk group describe microservice_c
 ```
-
-
-
-
-
 
 
