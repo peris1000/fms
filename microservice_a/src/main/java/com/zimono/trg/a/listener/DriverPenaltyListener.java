@@ -3,7 +3,6 @@ package com.zimono.trg.a.listener;
 import com.zimono.trg.a.model.Driver;
 import com.zimono.trg.a.repository.DriverRepository;
 import com.zimono.trg.a.service.CacheInvalidationService;
-import com.zimono.trg.a.service.DriverService;
 import com.zimono.trg.shared.DriverPenaltyMessage;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -46,16 +45,14 @@ public class DriverPenaltyListener {
             // Invalidate cache
             cacheInvalidationService.invalidateDriverCache(message.driverId());
 
-            // Update penalty points
-            int oldPoints = driver.getPenaltyPoints();
-            driver.setPenaltyPoints(oldPoints + message.penaltyPoints());
-            driver.setUpdatedAt(Instant.now());
-            repo.persistAndFlush(driver);
-
-            LOG.info("Applied {} penalty points to driver {}. Total: {} -> {}",
-                    message.penaltyPoints(), message.driverId(), oldPoints, driver.getPenaltyPoints());
-
-            return driver;
+            // Update penalty points on the fly
+            int result = repo.updateDriverPenalties(message.driverId(), message.penaltyPoints(), Instant.now());
+            if (result == 0) {
+                LOG.error("Cannot apply penalty: Driver {} not found", message.driverId());
+            } else {
+                LOG.info("Applied {} penalty points to driver {}", message.penaltyPoints(), message.driverId());
+            }
+            return null;
         }).replaceWithVoid();
     }
 }

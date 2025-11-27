@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @ApplicationScoped
 public class TripService {
@@ -43,11 +44,9 @@ public class TripService {
 
     @CacheResult(cacheName = "trips-cache")
     public Trip getTripById(Long id) {
-        Trip entity = repo.findByIdOptional(id).orElse(null);
-        if (entity == null) {
-            throw new NotFoundException("Trip not found with id: " + id);
-        }
-        return entity;
+        return repo.findByIdOptional(id).orElseThrow(
+                () -> new NotFoundException("Trip not found with id: " + id)
+        );
     }
 
     @Transactional
@@ -95,13 +94,15 @@ public class TripService {
 
     @Transactional
     public Trip update(Long id, TripDto dto) {
-        Trip existing = repo.findById(id);
-        if (existing == null) {
-            throw new NotFoundException("Trip not found with id: " + id);
-        }
-        if (existing.getStartTime() != null) {
-            throw new IllegalArgumentException("Trip already started. Cannot update.");
-        }
+        Trip existing = Optional.ofNullable(repo.findById(id))
+                .map(car -> {
+                    if (car.getStartTime() != null) {
+                        throw new IllegalArgumentException("Trip already started. Cannot update.");
+                    }
+                    return car;
+                })
+                .orElseThrow(() -> new NotFoundException("Trip not found with id: " + id));
+
         Car car = carRepo.findById(dto.getCarId());
         existing.setCar(car);
         Driver driver = driverRepo.findById(dto.getDriverId());
@@ -118,70 +119,72 @@ public class TripService {
 
     @Transactional
     public void delete(Long id) {
-        Trip existing = repo.findById(id);
-        if (existing == null) {
-            throw new NotFoundException("Trip not found with id: " + id);
-        }
+
+        Trip existing = Optional.ofNullable(repo.findById(id))
+                .orElseThrow(() -> new NotFoundException("Trip not found with id: " + id));
+
         repo.deleteById(id);
 
         // invalidate cache
-        cacheInvalidationService.invalidateTripCache(id);
+        cacheInvalidationService.invalidateTripCache(existing.getId());
         LOG.info("Deleted trip with ID: {}", id);
     }
 
     @Transactional
     public Trip startTrip(Long id) {
-        Trip existing = getTripById(id);
-        if (existing != null) {
-            if (existing.getEndTime() != null) {
-                throw new IllegalArgumentException("Trip already ended. You better create a new one.");
-            }
-            if (existing.getStartTime() != null) {
-                throw new IllegalArgumentException("Trip already started");
-            }
 
-            existing.setStartTime(LocalDateTime.now());
+        Trip existing = Optional.ofNullable(repo.findById(id))
+                .map(car -> {
+                    if (car.getEndTime() != null) {
+                        throw new IllegalArgumentException("Trip already ended. You better create a new one.");
+                    }
+                    if (car.getStartTime() != null) {
+                        throw new IllegalArgumentException("Trip already started");
+                    }
+                    return car;
+                })
+                .orElseThrow(() -> new NotFoundException("Trip not found with id: " + id));
 
-            // send message to kafka
-            tripProducer.startTrip(new TripMessage.Builder()
-                    .tripId(existing.getId())
-                    .carId(existing.getCar().getId())
-                    .driverId(existing.getDriver().getId()).build()
-            );
-            // invalidate cache
-            cacheInvalidationService.invalidateTripCache(id);
-            LOG.info("Starting trip with ID: {}", id);
-            return existing;
-        } else {
-            throw new NotFoundException("Trip not found");
-        }
+        existing.setStartTime(LocalDateTime.now());
+
+        // send message to kafka
+        tripProducer.startTrip(new TripMessage.Builder()
+                .tripId(existing.getId())
+                .carId(existing.getCar().getId())
+                .driverId(existing.getDriver().getId()).build()
+        );
+        // invalidate cache
+        cacheInvalidationService.invalidateTripCache(id);
+        LOG.info("Starting trip with ID: {}", id);
+        return existing;
     }
 
     @Transactional
     public Trip stopTrip(Long id) {
-        Trip existing = getTripById(id);
-        if (existing != null) {
-            if (existing.getStartTime() == null) {
-                throw new IllegalArgumentException("Trip not started yet");
-            }
-            if (existing.getEndTime() != null) {
-                throw new IllegalArgumentException("Trip already ended");
-            }
-            existing.setEndTime(LocalDateTime.now());
+        Trip existing = Optional.ofNullable(repo.findById(id))
+                .map(car -> {
+                    if (car.getStartTime() == null) {
+                        throw new IllegalArgumentException("Trip not started yet");
+                    }
+                    if (car.getEndTime() != null) {
+                        throw new IllegalArgumentException("Trip already ended");
+                    }
+                    return car;
+                })
+                .orElseThrow(() -> new NotFoundException("Trip not found with id: " + id));
 
-            // send message to kafka
-            tripProducer.stopTrip(new TripMessage.Builder()
-                    .tripId(existing.getId())
-                    .carId(existing.getCar().getId())
-                    .driverId(existing.getDriver().getId()).build()
-            );
+        existing.setEndTime(LocalDateTime.now());
 
-            // invalidate cache
-            cacheInvalidationService.invalidateTripCache(id);
-            LOG.info("Stopping trip with ID: {}", id);
-            return existing;
-        } else {
-            throw new NotFoundException("Trip not found");
-        }
+        // send message to kafka
+        tripProducer.stopTrip(new TripMessage.Builder()
+                .tripId(existing.getId())
+                .carId(existing.getCar().getId())
+                .driverId(existing.getDriver().getId()).build()
+        );
+
+        // invalidate cache
+        cacheInvalidationService.invalidateTripCache(id);
+        LOG.info("Stopping trip with ID: {}", id);
+        return existing;
     }
 }

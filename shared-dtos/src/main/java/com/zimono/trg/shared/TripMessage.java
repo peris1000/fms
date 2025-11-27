@@ -1,5 +1,8 @@
 package com.zimono.trg.shared;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public record TripMessage(long tripId, long carId, long driverId) {
 
     public static Builder builder() {

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @ApplicationScoped
 public class CarService {
@@ -49,30 +50,28 @@ public class CarService {
 
     @CacheResult(cacheName = "cars-cache")
     public Car getCarById(Long id) {
-        Car entity = carRepo.findByIdOptional(id).orElse(null);
-        if (entity == null) {
-            throw new NotFoundException("Car not found with id: " + id);
-        }
-        return entity;
+        return carRepo.findByIdOptional(id).orElseThrow(
+            () -> new NotFoundException("Car not found with id: " + id)
+        );
     }
 
 
     @Transactional
     public Car createCar(CarDto dto) {
-        // check that no existing car has this license plate
-        carRepo.findByLicensePlateNumberOptional(dto.getLicensePlate()).ifPresent(car -> {
-           throw new IllegalArgumentException("Car " + car.getId() + " has the same license plate");
-        });
-        Car entity = new Car();
-        entity.setBrand(dto.getBrand());
-        entity.setModel(dto.getModel());
-        entity.setSerialNumber(dto.getSerialNumber());
-        entity.setLicensePlate(dto.getLicensePlate());
-        entity.setCreatedAt(Instant.now());
-        entity.setUpdatedAt(Instant.now());
-        carRepo.persist(entity);
-
-        return entity;
+        return (Car) carRepo.findByLicensePlateNumberOptional(dto.getLicensePlate())
+                .map(car -> {
+                    throw new IllegalArgumentException("Car " + car.getId() + " has the same license plate");
+                }).orElseGet(() -> {
+                    Car entity = new Car();
+                    entity.setBrand(dto.getBrand());
+                    entity.setModel(dto.getModel());
+                    entity.setSerialNumber(dto.getSerialNumber());
+                    entity.setLicensePlate(dto.getLicensePlate());
+                    entity.setCreatedAt(Instant.now());
+                    entity.setUpdatedAt(Instant.now());
+                    carRepo.persist(entity);
+                    return entity;
+                });
     }
 
     @Transactional
@@ -103,14 +102,14 @@ public class CarService {
 
     @Transactional
     public void delete(Long id) {
-        Car existing = carRepo.findById(id);
-        if (existing == null) {
-            throw new NotFoundException("Car not found with id: " + id);
-        }
-        long tripCount = tripRepo.countByCar(id);
-        if (tripCount > 0) {
-            throw new IllegalArgumentException("Car has trips assigned. Cannot delete.");
-        }
+        Car existing = Optional.ofNullable(carRepo.findById(id))
+                .map(car -> {
+                    if (tripRepo.countByCar(id) > 0) {
+                        throw new IllegalArgumentException("Car has trips assigned. Cannot delete.");
+                    }
+                    return car;
+                })
+                .orElseThrow(() -> new NotFoundException("Car not found with id: " + id));
 
         carRepo.deleteById(id);
 

@@ -1,0 +1,23 @@
+quarkus:
+  oidc:
+    enabled: false  # Disable OIDC entirely in tests, use @TestSecurity instead
+  flyway:
+    migrate-at-start: false
+  datasource:
+    devservices:
+      enabled: true
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+  opentelemetry:
+    enabled: false
+  micrometer:
+    enabled: false
+  rest-client:
+    penalty-api:
+      url: http://localhost:18085
+      trust-all: true
+      verify-host: false
+  arc:
+    unremovable-types:
+      - com.zimono.trg.a.client.PenaltyClient

@@ -75,46 +75,9 @@ quarkus:
     db-kind: mysql
     username: user1
     password: pass1
-
-# Production/Dev datasource URL (not used in tests - DevServices provides it)
-"%dev":
-  quarkus:
-    datasource:
-      jdbc:
-        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
-
-"%prod":
-  quarkus:
-    datasource:
-      jdbc:
-        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
-#  datasource:
-#    db-kind: postgresql
-#    username: ${DB_USERNAME:user1}
-#    password: ${DB_PASSWORD:pass1}
-#    jdbc:
-#      url: ${DB_URL:jdbc:postgresql://localhost:15432/zimono_trg_c}
-#      # Connection pool configuration
-#      initial-size: 5
-#      min-size: 5
-#      max-size: 20
-#      # Connection health check
-#      validation-query-sql: SELECT 1
-#      background-validation-interval: PT2M
-#      # Idle timeout
-#      idle-removal-interval: PT5M
-#      max-lifetime: PT30M
-#      # Leak detection
-#      leak-detection-interval: PT10M
-  hibernate-orm:
-    database:
-      #generation: drop-and-create
-      generation: update
-    log:
-      sql: false
-kafka:
-  bootstrap:
-    servers: localhost:19092
+#kafka:
+#  bootstrap:
+#    servers: localhost:19092
 mp:
   messaging:
     connector:
@@ -151,7 +114,43 @@ mp:
         enable.auto.commit: false    # Manual commit for better control
         session.timeout.ms: 30000    # 30 seconds
         heartbeat.interval.ms: 3000  # 3 seconds
-# Test profile - uses Dev Services for automatic container management
+"%dev":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  kafka:
+    bootstrap:
+      servers: localhost:19092
+"%prod":
+  quarkus:
+    datasource:
+      jdbc:
+        url: jdbc:mysql://localhost:13306/zimono_trg_c?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  #  datasource:
+  #    db-kind: postgresql
+  #    username: ${DB_USERNAME:user1}
+  #    password: ${DB_PASSWORD:pass1}
+  #    jdbc:
+  #      url: ${DB_URL:jdbc:postgresql://localhost:15432/zimono_trg_c}
+  #      # Connection pool configuration
+  #      initial-size: 5
+  #      min-size: 5
+  #      max-size: 20
+  #      # Connection health check
+  #      validation-query-sql: SELECT 1
+  #      background-validation-interval: PT2M
+  #      # Idle timeout
+  #      idle-removal-interval: PT5M
+  #      max-lifetime: PT30M
+  #      # Leak detection
+  #      leak-detection-interval: PT10M
+    hibernate-orm:
+      database:
+        #generation: drop-and-create
+        generation: update
+      log:
+        sql: false
 "%test":
   quarkus:
     flyway:

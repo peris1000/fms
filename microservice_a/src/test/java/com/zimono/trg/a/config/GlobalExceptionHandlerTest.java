@@ -1,4 +1,4 @@
-package com.zimono.trg.a;
+package com.zimono.trg.a.config;
 
 import com.zimono.trg.a.config.GlobalExceptionHandler;
 import jakarta.validation.ConstraintViolationException;

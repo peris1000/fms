@@ -1,5 +1,7 @@
 package com.zimono.trg.a.config;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.inject.Singleton;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
@@ -13,6 +15,7 @@ import java.time.Instant;
 
 
 @Provider
+@Singleton
 public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -64,6 +67,7 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
                 .build();
     }
 
+    @RegisterForReflection
     public static class ErrorResponse {
         public Instant timestamp;
         public String message;

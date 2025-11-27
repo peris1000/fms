@@ -75,19 +75,20 @@ mp:
     outgoing:
       car-heartbeats:
         connector: smallrye-kafka
-        bootstrap.servers: localhost:19092
+        bootstrap.servers: ${kafka.bootstrap.servers}
         topic: car-heartbeats
         value.serializer: org.apache.kafka.common.serialization.StringSerializer
+#        value.serializer: io.quarkus.kafka.client.serialization.ObjectMapperSerializer
     incoming:
       trip-starts:
         connector: smallrye-kafka
-        bootstrap.servers: localhost:19092
+        bootstrap.servers: ${kafka.bootstrap.servers}
         topic: trip-starts
         group.id: microservice_b
         value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
       trip-stops:
         connector: smallrye-kafka
-        bootstrap.servers: localhost:19092
+        bootstrap.servers: ${kafka.bootstrap.servers}
         topic: trip-stops
         group.id: microservice_b
         value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -100,7 +101,27 @@ simulation:
     base-latitude: 40.7128    # NYC
     base-longitude: -74.0060  # NYC
     deviation: 0.1  # deviation
+"%local":
+  kafka:
+    bootstrap:
+      servers: localhost:19092
+"%dev":
+  kafka:
+    bootstrap:
+      servers: localhost:19092
 "%test":
+  quarkus:
+    opentelemetry:
+      enabled: false
+    micrometer:
+      enabled: false
+    scheduler:
+      enabled: false
+  kafka:
+    bootstrap:
+      servers: localhost:19092
+#    devservices:
+#      enabled: false
   simulation:
     interval: 5s
     speed:
@@ -110,12 +131,8 @@ simulation:
       base-latitude: 40.7128
       base-longitude: -74.0060
       deviation: 0.1  # deviation
-# Test profile - uses Dev Services for automatic Kafka container
-"%test":
+"%prod":
   quarkus:
-    opentelemetry:
-      enabled: false
-    micrometer:
-      enabled: false
-    scheduler:
-      enabled: false
+    kafka:
+      bootstrap:
+        servers: ${KAFKA_BOOTSTRAP_SERVERS}

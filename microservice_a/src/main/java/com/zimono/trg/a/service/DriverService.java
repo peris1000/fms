@@ -40,11 +40,9 @@ public class DriverService {
 
     @CacheResult(cacheName = "drivers-cache")
     public Driver getDriverById(Long id) {
-        Driver entity = repo.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("Driver not found with id: " + id);
-        }
-        return entity;
+        return repo.findByIdOptional(id).orElseThrow(
+            () -> new NotFoundException("Driver not found with id: " + id)
+        );
     }
 
     @Transactional
@@ -64,43 +62,33 @@ public class DriverService {
 
     @Transactional
     public Driver updateDriver(Long id, DriverDto driverDto) {
-        Driver entity = repo.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("Driver not found with id: " + id);
-        }
+        return repo.findByIdOptional(id)
+                .map(existing -> {
+                    cacheInvalidationService.invalidateDriverCache(id);
 
-        // invalidate cache
-        cacheInvalidationService.invalidateDriverCache(id);
-
-        entity.setFirstName(driverDto.getFirstName());
-        entity.setLastName(driverDto.getLastName());
-        entity.setEmail(driverDto.getEmail());
-        entity.setDrivingLicense(driverDto.getDrivingLicense());
-        entity.setUpdatedAt(Instant.now());
-
-        LOG.info("Updated driver with ID: {}", id);
-        return entity;
+                    existing.setFirstName(driverDto.getFirstName());
+                    existing.setLastName(driverDto.getLastName());
+                    existing.setEmail(driverDto.getEmail());
+                    existing.setDrivingLicense(driverDto.getDrivingLicense());
+                    existing.setUpdatedAt(Instant.now());
+                    return existing;
+                })
+                .orElseThrow(
+                    () -> new NotFoundException("Driver not found with id: " + id)
+                );
     }
 
     @Transactional
     public void deleteDriver(Long id) {
-        Driver driver = repo.findById(id);
-        if (driver == null) {
-            throw new NotFoundException("Driver not found with id: " + id);
-        }
-
-        long tripCount = tripRepo.countByDriver(id);
-        if (tripCount > 0) {
-            throw new IllegalArgumentException("Driver has trips assigned. Cannot delete.");
-        }
-        long carCount = carRepo.countByDriver(id);
-        if (carCount > 0) {
-            throw new IllegalArgumentException("Driver has cars assigned. Cannot delete.");
-        }
-        repo.deleteById(id);
-
-        // invalidate cache
-        cacheInvalidationService.invalidateDriverCache(id);
-        LOG.info("Deleted driver with ID: {}", id);
+        repo.findByIdOptional(id)
+                .filter(r -> tripRepo.countByDriver(r.getId()) == 0)
+                .filter(r -> carRepo.countByDriver(r.getId()) == 0)
+                .ifPresentOrElse(r -> {
+                    repo.deleteById(r.getId());
+                    cacheInvalidationService.invalidateDriverCache(id);
+                    LOG.info("Deleted driver with ID: {}", r.getId());
+                }, () -> {
+                    LOG.info("Driver with ID: {} not exists or not eligible for for deletion.", id);
+                });
     }
 }

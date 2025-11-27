@@ -483,4 +483,23 @@ Check what kafka knows about each project (group)
 docker exec -it fms-redpanda-dev rpk group describe microservice_c
 ```
 
+### Build Native Image and Run
+```
+mvn -f ./microservice_a/pom.xml clean package -Dquarkus.package.type=native -Dmaven.test.skip=true
+ll ./microservice_a/target
+./microservice_a/target/microservice_a-1.0-SNAPSHOT-runner
 
+mvn -f ./microservice_b/pom.xml clean package -Dquarkus.package.type=native -Dmaven.test.skip=true
+ll ./microservice_b/target
+./microservice_b/target/microservice_b-1.0-SNAPSHOT-runner
+
+mvn -f ./microservice_c/pom.xml clean package -Dquarkus.package.type=native -Dmaven.test.skip=true -Dquarkus.native.container-build=true  # if not building in linux, to build a linux binary
+ll ./microservice_c/target
+./microservice_c/target/microservice_c-1.0-SNAPSHOT-runner
+```
+
+jacoco reports
+```
+./microservice_a
+./mvnw clean package -Dnative -DskipTests -Djacoco.skip=true
+```

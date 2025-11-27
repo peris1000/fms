@@ -1,0 +1,4 @@
+quarkus:
+  datasource:
+    jdbc:
+      url: jdbc:mysql://localhost:13306/zimono_trg_a?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true

@@ -19,3 +19,6 @@ quarkus:
         level: DEBUG
       "io.opentelemetry":
         level: DEBUG
+kafka:
+  bootstrap:
+    servers: localhost:19092

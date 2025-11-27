@@ -1,24 +1,32 @@
 package com.zimono.trg.b.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zimono.trg.shared.TripMessage;
 import com.zimono.trg.shared.Heartbeat;
+import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.MutinyEmitter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.reactive.messaging.OnOverflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -38,11 +46,16 @@ public class CarSimulatorService {
     double deviation;
 
     @Channel("car-heartbeats")
+//    @OnOverflow(OnOverflow.Strategy.DROP)
+//    @OnOverflow(value = OnOverflow.Strategy.BUFFER, bufferSize = 30000)
     Emitter<Heartbeat> heartbeatEmitter;
+//    MutinyEmitter<Heartbeat> heartbeatEmitter;
 
     @Inject
     HeartbeatGenerator heartbeatGenerator;
 
+    private volatile boolean running = false;
+    private AtomicInteger counter = new AtomicInteger(0);
     // storage for trip assignments
     private static final ConcurrentHashMap<Long, TripMessage> TRIPS = new ConcurrentHashMap<>();
     // helper to avoid race conditions
@@ -51,14 +64,23 @@ public class CarSimulatorService {
     void onStart(@Observes StartupEvent ev) {
         // just to know that the service has started
         LOG.info("Car Simulator Service starting...");
+        running = true;
+    }
+    void onStop(@Observes ShutdownEvent ev) {
+        running = false;
     }
 
     @Scheduled(every = "{simulation.interval:10s}")
     public void generateScheduledHeartbeat() {
+
+        if (!running) {
+            return; // avoid emitting after shutdown
+        }
         if (TRIPS.isEmpty()) {
             LOG.debug("No active trips to simulate");
             return;
         }
+
         ConfigParams params = new ConfigParams(minSpeed, maxSpeed, baseLatitude, baseLongitude, deviation);
         // pseudo validate
         if (params.minSpeed() < 0 || params.maxSpeed() < 0 || params.minSpeed() >= params.maxSpeed() || params.deviation() <= 0
@@ -69,31 +91,53 @@ public class CarSimulatorService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Generating {} heartbeats", TRIPS.size());
         }
-        List<CompletableFuture<Void>> futures = TRIPS.entrySet().stream()
-                .filter(entry -> !REMOVALS.contains(entry.getKey()))
-                .map(entry -> CompletableFuture.runAsync(() -> {
-                    try {
-                        TripMessage trip = entry.getValue();
-                        Heartbeat heartbeat = heartbeatGenerator.generateHeartbeat(
-                                params, entry.getKey(), trip.carId(), trip.driverId()
-                        );
-                        heartbeatEmitter.send(heartbeat);
-                        LOG.debug("Sent heartbeat: Trip={}, Speed={} Km/h", entry.getKey(), heartbeat.speed());
-                    } catch (Exception e) {
-                        LOG.error("Failed to generate heartbeat for trip {}", entry.getKey(), e);
-                    }
-                }))
-                .collect(Collectors.toList());
 
-        // Wait for all to complete (with timeout)
-        try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(5, TimeUnit.SECONDS);
-            LOG.info("Successfully sent {} heartbeats", futures.size());
-        } catch (TimeoutException e) {
-            LOG.warn("Heartbeat generation timed out after 5 seconds");
-        } catch (Exception e) {
-            LOG.error("Error during heartbeat generation", e);
-        }
+        // for sending high traffic (with buffering setup)
+//        List<CompletableFuture<Void>> futures = TRIPS.entrySet().stream()
+//                .filter(entry -> !REMOVALS.contains(entry.getKey()) && running)
+//                .map(entry -> CompletableFuture.runAsync(() -> {
+//                    try {
+//                        TripMessage trip = entry.getValue();
+//                        Heartbeat heartbeat = heartbeatGenerator.generateHeartbeat(
+//                                params, entry.getKey(), trip.carId(), trip.driverId()
+//                        );
+//                        heartbeatEmitter.send(heartbeat);
+//                        LOG.debug("Sent heartbeat: Trip={}, Speed={} Km/h", entry.getKey(), heartbeat.speed());
+//                    } catch (Exception e) {
+//                        LOG.error("Failed to generate heartbeat for trip {}", entry.getKey(), e);
+//                    }
+//                }))
+//                .collect(Collectors.toList());
+//
+//        // Wait for all to complete (with timeout)
+//        try {
+//            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(5, TimeUnit.SECONDS);
+//            LOG.info("Successfully sent {} heartbeats", futures.size());
+//        } catch (TimeoutException e) {
+//            LOG.warn("Heartbeat generation timed out after 5 seconds");
+//        } catch (Exception e) {
+//            LOG.error("Error during heartbeat generation", e);
+//        }
+
+
+        // for sending high traffic (without buffering)
+        Multi.createFrom().items(TRIPS.entrySet().stream()
+                        .filter(entry -> !REMOVALS.contains(entry.getKey()))
+                        .map(Map.Entry::getValue))
+                .onItem().transform(trip ->
+                        heartbeatGenerator.generateHeartbeat(params,
+                                trip.tripId(), trip.carId(), trip.driverId())
+                )
+                .onItem().transformToUniAndMerge(this::sendReactive)
+                .subscribe().with(
+                        v -> {},
+                        err -> LOG.error("Stream error", err)
+                );
+    }
+
+    private Uni<Void> sendReactive(Heartbeat hb) {
+        return Uni.createFrom()
+                .completionStage(() -> heartbeatEmitter.send(hb));
     }
 
     public boolean addTrip(TripMessage message) {
