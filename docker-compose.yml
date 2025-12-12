@@ -1,6 +1,6 @@
 services:
   redpanda:
-    image: redpandadata/redpanda:v25.2.10
+    image: redpandadata/redpanda:v24.1.2
     container_name: fms-redpanda-dev
     command:
       - redpanda

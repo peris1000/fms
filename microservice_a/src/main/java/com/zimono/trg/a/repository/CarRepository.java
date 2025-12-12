@@ -62,6 +62,10 @@ public class CarRepository implements PanacheRepository<Car> {
         update("assignedDriver = null where assignedDriver.id = :driverId", Map.of("driverId", driverId));
     }
 
+    public int unassignDriverFromCar(Long carId) {
+        return update("assignedDriver = null where id = :carId", Map.of("carId", carId));
+    }
+
     public long  countByDriver(Long driverId) {
         return count("assignedDriver.id = ?1", driverId);
     }

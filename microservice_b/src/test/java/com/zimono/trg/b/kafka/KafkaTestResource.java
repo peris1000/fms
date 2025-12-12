@@ -27,7 +27,7 @@ public class KafkaTestResource implements QuarkusTestResourceLifecycleManager {
 //
 //    @Override
 //    public Map<String, String> start() {
-//        container = new RedpandaContainer("redpandadata/redpanda:v25.2.10");
+//        container = new RedpandaContainer("redpandadata/redpanda:v24.1.2");
 //        container.start();
 //        return Map.of(
 //                "kafka.bootstrap.servers", container.getBootstrapServers()

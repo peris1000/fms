@@ -3,7 +3,6 @@ package com.zimono.trg.a.service;
 
 import com.zimono.trg.a.dto.DriverDto;
 import com.zimono.trg.a.model.Driver;
-import com.zimono.trg.a.producer.TripProducer;
 import com.zimono.trg.a.repository.CarRepository;
 import com.zimono.trg.a.repository.DriverRepository;
 import com.zimono.trg.a.repository.TripRepository;
@@ -30,9 +29,6 @@ public class DriverService {
     CarRepository carRepo;
     @Inject
     TripRepository tripRepo;
-    @Inject
-    TripProducer tripProducer;
-
 
     public List<Driver> getAllDrivers() {
         return repo.listAll();

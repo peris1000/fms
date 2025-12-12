@@ -1,7 +1,5 @@
 # FMS Project
 
-**Time: 3 days**
-
 ## Scenario
 
 You are required to develop 3 microservices (using Quarkus or any other framework you

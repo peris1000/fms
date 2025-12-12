@@ -123,6 +123,7 @@ public class CarService {
         Car car = carRepo.findById(request.carId);
         Driver driver = driverRepo.findById(request.driverId);
 
+        // validation
         if (car == null || driver == null) {
             throw new NotFoundException("Car or Driver not found");
         }
@@ -151,14 +152,17 @@ public class CarService {
         }
 
         Long driverId = car.getAssignedDriver() != null ? car.getAssignedDriver().getId() : null;
-        car.setAssignedDriver(null);
-        car.setUpdatedAt(Instant.now());
-        carRepo.persist(car);
-
         // Invalidate cache
-        cacheInvalidationService.invalidateCarCache(carId);
         if (driverId != null) {
             cacheInvalidationService.invalidateDriverCache(driverId);
+        }
+        cacheInvalidationService.invalidateCarCache(carId);
+
+        int res = carRepo.unassignDriverFromCar(carId);
+        if (res == 0) {
+            LOG.warn("No car or No driver assigned for carId: {}", carId);
+        } else {
+            car.setAssignedDriver(null);
         }
         return car;
     }
