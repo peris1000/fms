@@ -501,3 +501,10 @@ jacoco reports
 ./microservice_a
 ./mvnw clean package -Dnative -DskipTests -Djacoco.skip=true
 ```
+
+### Install Stomp client
+This is for the case you want the d service exporting a stomp endpoint.
+```
+npm install sockjs-client @stomp/stompjs
+```
+

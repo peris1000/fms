@@ -1,0 +1,25 @@
+quarkus:
+  http:
+    port: 18086
+mp:
+  messaging:
+    connector:
+      smallrye-kafka: # traces through kafka
+        propagate-record-headers: true
+    incoming:
+      car-heartbeats:
+        connector: smallrye-kafka
+        topic: car-heartbeats
+        group.id: microservice_d
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        auto.offset.reset: earliest
+      trip-stops:
+        connector: smallrye-kafka
+        topic: trip-stops
+        group.id: microservice_d
+        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        auto.offset.reset: earliest
+"%dev":
+  kafka:
+    bootstrap:
+      servers: localhost:19092

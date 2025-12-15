@@ -2,6 +2,7 @@ package com.zimono.trg.b.listener;
 
 import com.zimono.trg.b.service.CarSimulatorService;
 import com.zimono.trg.shared.TripMessage;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+@ApplicationScoped
 public class TripListener {
     private static final Logger LOG = LoggerFactory.getLogger(TripListener.class);
 
